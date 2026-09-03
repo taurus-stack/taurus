@@ -1,0 +1,93 @@
+# ====================================================================
+# Taurus Stack — 根仓库 .gitignore
+# ====================================================================
+#
+# 根仓库通过 git submodule 管理各子仓库。
+# 各子仓库有自己独立的 .gitignore，这里只处理根目录独有的文件。
+#
+
+# ====================================================================
+# 🔒 SECURITY — 密钥 / 私钥 / 凭据（根目录独有的）
+# ====================================================================
+# 签发服务器私钥
+scripts/secrets/
+scripts/license_signer.py
+scripts/gen_rsa_keys.py
+scripts/_secrets/
+
+# 根目录 .env
+.env
+.env.local
+.env.*.local
+!*.env.example
+
+# ====================================================================
+# AI IDE 辅助编程产物
+# ====================================================================
+.trae/
+trae-agent/
+.traeignore
+CLAUDE.md
+CLAUDE.txt
+
+# ====================================================================
+# Editor / IDE 配置
+# ====================================================================
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+*.code-workspace
+
+# ====================================================================
+# Python / Node 通用
+# ====================================================================
+__pycache__/
+*.pyc
+node_modules/
+.pytest_cache/
+
+# ====================================================================
+# 根目录临时 / 调试 / 诊断脚本
+# ====================================================================
+# 根目录下的调试文件
+_dbg*.b64
+_dbg*.log
+_debug*.py
+_smoke*.py
+_test*.py
+__check_rules.log
+__check_rules.py
+run_websocket_server.log
+
+# scripts/ 下的诊断/审计脚本（非签发工具）
+scripts/_*_diag*.py
+scripts/_m*_diag*.py
+scripts/_m*_audit*.json
+scripts/*_audit*.py
+scripts/*_size_diag*.py
+scripts/scan_i18n.py
+scripts/batch_fix_i18n.py
+scripts/migrate_official_scripts.py
+scripts/m*_smoke*.py
+scripts/m*_verify*.py
+scripts/m*_skeleton*.py
+scripts/m4*.py
+
+# 运行时
+nohup.out
+*.log
+
+# 打包/发布
+*.tar.gz
+*.zip
+*.whl
+dist-release/
+*.spec.bak
+
+# macOS / Windows
+.DS_Store
+Thumbs.db
+.gitmodules

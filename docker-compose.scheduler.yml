@@ -1,0 +1,124 @@
+# 独立部署：Taurus Stack 解耦服务集
+# 包含：
+#   - taurus-scheduler (APScheduler + Leader Election)
+#   - taurus-scheduler-worker (Django MGMT CMD 消费 Redis 队列 → 实际脚本执行)
+# 依赖服务：MySQL + Redis（通常与 taurus-backend 共享，此处单独声明便于理解
+#
+# 启动：
+#   cd taurus-stack
+#   docker compose -f docker-compose.scheduler.yml up -d --build
+#
+# 验证：
+#   curl http://127.0.0.1:9101/health
+#   curl http://127.0.0.1:9101/metrics
+
+services:
+  taurus-scheduler:
+    build:
+      context: ./taurus-scheduler
+      dockerfile: Dockerfile
+    image: taurus-scheduler:latest
+    container_name: taurus-scheduler
+    restart: unless-stopped
+    environment:
+      # 实例标识，多副本改为 scheduler-02, scheduler-03...
+      SCHEDULER_INSTANCE_ID: scheduler-01
+      LOG_LEVEL: INFO
+      # 共享数据库（注意：网络需能连到 MySQL 服务）
+      DB_HOST: ${DB_HOST:-mysql}
+      DB_PORT: ${DB_PORT:-3306}
+      DB_USER: ${DB_USER:-root}
+      DB_PASSWORD: ${DB_PASSWORD:-taurus}
+      DB_NAME: ${DB_NAME:-taurus_backend}
+      DB_TABLE_PREFIX: ${DB_TABLE_PREFIX:-taurus_}
+      # Redis（用于分布式锁 + 任务队列，网络可达）
+      # 优先分字段设置（含密码），设置 REDIS_URL 则覆盖
+      REDIS_HOST: ${REDIS_HOST:-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      REDIS_DB: ${REDIS_DB:-2}
+      # REDIS_URL: ${REDIS_URL:-redis://:password@redis:6379/2}
+      # 调度参数
+      SCHEDULER_JOB_SYNC_INTERVAL: 10
+      SCHEDULER_MISFIRE_GRACE_SECONDS: 3600
+      SCHEDULER_LEADER_LOCK_TTL: 30
+      SCHEDULER_DEDUP_TTL: 600
+      # 可选：失败兜底回调后端 API
+      BACKEND_API_BASE_URL: ${BACKEND_API_BASE_URL:-http://taurus-backend:8000}
+      # BACKEND_API_TOKEN: ${BACKEND_API_TOKEN:-}
+      # 健康检查
+      HEALTH_HOST: 0.0.0.0
+      HEALTH_PORT: 9101
+      TIMEZONE: Asia/Shanghai
+      TZ: Asia/Shanghai
+    ports:
+      - "9101:9101"
+    # 多副本时可去掉 ports 只内部 /metrics 通过服务发现
+    # deploy:
+    #   replicas: 2   # 开启后 2 个实例自动主备选举，只有 1 个实际调度
+    networks:
+      - taurus-net
+    depends_on:
+      - mysql
+      - redis
+
+  taurus-scheduler-worker:
+    build:
+      context: ./taurus-backend
+      dockerfile: Dockerfile
+    image: taurus-backend:latest
+    container_name: taurus-scheduler-worker
+    restart: unless-stopped
+    # 复用 taurus-backend 镜像，用独立 entrypoint 启动 worker（不启动 Gunicorn
+    entrypoint: [
+      "bash", "-c",
+      "cd /app && poetry run python manage.py run_scheduler_worker --workers 4"
+    ]
+    environment:
+      DJANGO_SETTINGS_MODULE: application.settings
+      REDIS_URL_SCHEDULER: ${REDIS_URL:-redis://redis:6379/2}
+      WORKER_CONCURRENCY: "4"
+      TAURUS_SCHEDULER_QUEUE: "taurus:scheduler:queue:script_task"
+      # 数据库 / 证书等与 backend 同配置，复用 backend env 即可
+      TZ: Asia/Shanghai
+    volumes:
+      - ./taurus-backend/certs:/app/certs:ro
+    networks:
+      - taurus-net
+    depends_on:
+      - mysql
+      - redis
+      - taurus-scheduler
+
+  # 下方是基础设施服务（若已有共享实例可删除此处）
+  mysql:
+    image: mysql:8.0
+    container_name: taurus-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: taurus
+      MYSQL_DATABASE: taurus_backend
+      TZ: Asia/Shanghai
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
+    volumes:
+      - taurus_mysql_data:/var/lib/mysql
+    networks:
+      - taurus-net
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: taurus-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "512mb", "--maxmemory-policy", "noeviction"]
+    volumes:
+      - taurus_redis_data:/data
+    networks:
+      - taurus-net
+
+volumes:
+  taurus_mysql_data:
+  taurus_redis_data:
+
+networks:
+  taurus-net:
+    driver: bridge
