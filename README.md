@@ -39,6 +39,38 @@ Taurus Stack ships in two editions sharing the same codebase:
 
 ---
 
+## Screenshots
+
+### Dashboard & Host Management
+
+| Home Dashboard                        | My Hosts                                        | Heartbeat Hosts                                                        | Heartbeat Record                                                          |
+|:-------------------------------------:|:-----------------------------------------------:|:----------------------------------------------------------------------:|:-------------------------------------------------------------------------:|
+| [![Home](img/home.png)](img/home.png) | [![My Hosts](img/my-host.png)](img/my-host.png) | [![Heartbeat Hosts](img/heartbeat-hosts.png)](img/heartbeat-hosts.png) | [![Heartbeat Record](img/heartbeat-record.png)](img/heartbeat-record.png) |
+
+### Job Management
+
+| Job Management                                                      | Job Execution Detail                                                   | Job Node Execution Detail                                                             |
+|:-------------------------------------------------------------------:|:----------------------------------------------------------------------:|:-------------------------------------------------------------------------------------:|
+| [![Job Management](img/job-management.png)](img/job-management.png) | [![Job Exec Detail](img/job-exec-detail.png)](img/job-exec-detail.png) | [![Job Node Exec Detail](img/job-node-exec-detail.png)](img/job-node-exec-detail.png) |
+
+| Execution Records                                                            | Execution Log                                                    | Run Detail                                              | Rerun                                    |
+|:----------------------------------------------------------------------------:|:----------------------------------------------------------------:|:-------------------------------------------------------:|:----------------------------------------:|
+| [![Execution Records](img/execution-records.png)](img/execution-records.png) | [![Execution Log](img/execution-log.png)](img/execution-log.png) | [![Run Detail](img/run-detail.png)](img/run-detail.png) | [![Rerun](img/rerun.png)](img/rerun.png) |
+
+### Scripts & Commands
+
+| Script Library                                                      | Run Script                                              | Program Commands                                                          | Run Command                                                |
+|:-------------------------------------------------------------------:|:-------------------------------------------------------:|:-------------------------------------------------------------------------:|:----------------------------------------------------------:|
+| [![Script Library](img/script-library.png)](img/script-library.png) | [![Run Script](img/run-script.png)](img/run-script.png) | [![Program Commands](img/program-commands.png)](img/program-commands.png) | [![Run Command](img/run-command.png)](img/run-command.png) |
+
+### Registration
+
+| Registration Token                                                              |
+|:-------------------------------------------------------------------------------:|
+| [![Registration Token](img/registration-token.png)](img/registration-token.png) |
+
+---
+
 ## Architecture
 
 ```
