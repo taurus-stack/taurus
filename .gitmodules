@@ -16,3 +16,6 @@
 [submodule "taurus-auth"]
 	path = taurus-auth
 	url = https://github.com/taurus-stack/taurus-auth
+[submodule "taurus-portal"]
+	path = taurus-portal
+	url = git@github.com:taurus-stack/taurus-portal.git
