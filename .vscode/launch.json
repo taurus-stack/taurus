@@ -227,6 +227,45 @@
       "trace": true,
       "disableNetworkCache": true,
       "cleanUp": "onlyTab"
+    },
+    {
+      "name": "🏠 Taurus Portal: Node Debugger",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": [
+        "-c",
+        "source ~/.bashrc && pnpm dev"
+      ],
+      "cwd": "${workspaceFolder}/taurus-portal",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "🏠 Taurus Portal: Edge Debugger",
+      "type": "msedge",
+      "request": "launch",
+      "url": "http://localhost:8082",
+      "webRoot": "${workspaceFolder}/taurus-portal",
+      "sourceMaps": true,
+      "sourceMapPathOverrides": {
+        "webpack:///./~/*": "${workspaceFolder}/taurus-portal/node_modules/*",
+        "webpack:///./*": "${workspaceFolder}/taurus-portal/*",
+        "webpack:///*": "*",
+        "webpack:///src/*": "${workspaceFolder}/taurus-portal/src/*",
+        "webpack://*": "${workspaceFolder}/taurus-portal/*"
+      },
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/taurus-portal/**",
+        "!**/node_modules/**"
+      ],
+      "skipFiles": [
+        "${workspaceFolder}/taurus-portal/node_modules/**/*.js",
+        "<node_internals>/**/*.js"
+      ],
+      "userDataDir": "${workspaceFolder}/taurus-portal/.vscode/edge-debug-profile",
+      "trace": true,
+      "disableNetworkCache": true,
+      "cleanUp": "onlyTab"
     }
   ],
   "compounds": [
@@ -262,6 +301,15 @@
         "🐍 Taurus Backend: Python Debugger",
         "🔌 Taurus WebSocket: Python Debugger",
         "🌐 Taurus Web: Node Debugger"
+      ],
+      "stopAll": true
+    },
+    {
+      "name": "🏠 门户全栈开发 (Django + WebSocket + Portal)",
+      "configurations": [
+        "🐍 Taurus Backend: Python Debugger",
+        "🔌 Taurus WebSocket: Python Debugger",
+        "🏠 Taurus Portal: Node Debugger"
       ],
       "stopAll": true
     },
