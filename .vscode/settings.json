@@ -1,0 +1,37 @@
+{
+    "python.defaultInterpreterPath": "python",
+    "python-envs.defaultEnvManager": "ms-python.python:conda",
+    "python-envs.terminal.autoActivationType": "command",
+    "terminal.integrated.profiles.linux": {
+        "bash (taurus)": {
+            "path": "bash",
+            "args": [
+                "--init-file",
+                "${workspaceFolder}/.vscode/bash_taurus.sh"
+            ]
+        }
+    },
+    "terminal.integrated.defaultProfile.linux": "bash (taurus)",
+    "python.poetryPath": "~/.local/bin/poetry",
+    "python-envs.defaultPackageManager": "ms-python.python:conda",
+    "python.testing.pytestArgs": [
+        "taurus-backend"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true,
+    "claudeCode.disableLoginPrompt": true,
+    "claudeCode.environmentVariables": [
+        {
+            "name": "ANTHROPIC_BASE_URL",
+            "value": "http://127.0.0.1:8082"
+        },
+        {
+            "name": "ANTHROPIC_AUTH_TOKEN",
+            "value": "freecc"
+        },
+        {
+            "name": "CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY",
+            "value": "1"
+        },
+    ]
+}

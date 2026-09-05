@@ -1,0 +1,99 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "启动 Django 后端",
+      "type": "shell",
+      "command": "python",
+      "args": ["manage.py", "runserver", "0.0.0.0:8000"],
+      "options": {
+        "cwd": "${workspaceFolder}/taurus-backend"
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "^.*$",
+          "file": 1,
+          "location": 2,
+          "message": 3
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "Starting development server",
+          "endsPattern": "Quit the server"
+        }
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "group": "backend"
+      }
+    },
+    {
+      "label": "启动 WebSocket 服务器",
+      "type": "shell",
+      "command": "python",
+      "args": ["manage/run_websocket_server.py"],
+      "options": {
+        "cwd": "${workspaceFolder}/taurus-backend"
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "^.*$",
+          "file": 1,
+          "location": 2,
+          "message": 3
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "启动 WebSocket 服务器",
+          "endsPattern": "server listening"
+        }
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "group": "backend"
+      }
+    },
+    {
+      "label": "启动 Taurus 开发环境",
+      "dependsOn": ["启动 Django 后端", "启动 WebSocket 服务器"],
+      "dependsOrder": "parallel",
+      "problemMatcher": []
+    },
+    {
+      "label": "📦 Taurus Backend: Export DB Dump",
+      "type": "shell",
+      "command": "bash dump_export_backend.sh",
+      "options": {
+        "cwd": "${workspaceFolder}/taurus-backend/db"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "group": "database"
+      }
+    },
+    {
+      "label": "🗄️ Taurus Backend: Import DB Dump",
+      "type": "shell",
+      "command": "bash dump_import_backend.sh",
+      "options": {
+        "cwd": "${workspaceFolder}/taurus-backend/db"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "group": "database"
+      }
+    },
+    {
+      "label": "停止所有服务",
+      "type": "shell",
+      "command": "pkill -f 'manage.py runserver' || pkill -f 'run_websocket_server.py' || true",
+      "problemMatcher": []
+    }
+  ]
+}

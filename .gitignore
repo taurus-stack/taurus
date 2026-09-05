@@ -34,7 +34,7 @@ CLAUDE.txt
 # Editor / IDE 配置
 # ====================================================================
 .idea/
-.vscode/
+# .vscode/
 *.swp
 *.swo
 .DS_Store
