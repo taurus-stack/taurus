@@ -10,6 +10,7 @@
 [![Python Version](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/)
 [![Vue Version](https://img.shields.io/badge/vue-3.2+-green.svg)](https://vuejs.org/)
 [![TypeScript](https://img.shields.io/badge/typescript-4.9+-blue.svg)](https://www.typescriptlang.org/)
+[![Website](https://img.shields.io/badge/Website-taurus--portal-teal.svg)](https://taurus-stack.github.io/taurus-portal/)
 [![Community Edition](https://img.shields.io/badge/Community-37%2F77%20Features-brightgreen.svg)](#community-edition)
 [![Enterprise Edition](https://img.shields.io/badge/Enterprise-77%2F77%20Features-blue.svg)](#enterprise-edition)
 
@@ -340,6 +341,7 @@ For security issues, see the `SECURITY.md` in each subproject.
 
 | Service          | Repository                                                           | Issues                                                                |
 | ---------------- | -------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| **Portal**       | [taurus-portal](https://github.com/taurus-stack/taurus-portal)       | [site](https://taurus-stack.github.io/taurus-portal/)                 |
 | Backend          | [taurus-backend](https://github.com/taurus-ops/taurus-backend)       | [tracker](https://github.com/taurus-ops/taurus-backend/issues)        |
 | Web              | [taurus-web](https://github.com/taurus-ops/taurus-web)               | [tracker](https://github.com/taurus-ops/taurus-web/issues)            |
 | Executor         | [taurus-executor](https://github.com/taurus-ops/taurus-executor)     | [tracker](https://github.com/taurus-ops/taurus-executor/issues)       |
