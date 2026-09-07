@@ -1,0 +1,299 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "🐍 Taurus Backend: Python Debugger",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/taurus-backend/manage.py",
+      "cwd": "${workspaceFolder}/taurus-backend",
+      "env": {
+        "DJANGO_SETTINGS_MODULE": "application.settings"
+      },
+      "args": [
+        "runserver",
+        "0.0.0.0:8000"
+      ],
+      "django": true,
+      "justMyCode": false
+    },
+    {
+      "name": "🔌 Taurus WebSocket: Python Debugger",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/taurus-backend/manage/run_websocket_server.py",
+      "cwd": "${workspaceFolder}/taurus-backend",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/taurus-backend",
+        "DJANGO_SETTINGS_MODULE": "application.settings",
+        "WEBSOCKET_HOST": "0.0.0.0",
+        "WEBSOCKET_PORT": "8765"
+      },
+      "justMyCode": false,
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "⚙️ Taurus Executor: Python Debugger",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "executor_core.main",
+      "cwd": "${workspaceFolder}/taurus-executor",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/taurus-executor/src",
+        "TAURUS_SERVER_URL": "http://localhost:8000",
+        "TAURUS_HOST_UUID": "568d7f6e-2bf3-4556-bb0c-26105e35c5ec"
+      },
+      "justMyCode": false,
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "📡 Taurus Supervisor: Python Debugger",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "taurus_supervisor.main",
+      "cwd": "${workspaceFolder}/taurus-supervisor",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/taurus-supervisor",
+        "BASE_DIR": "${env:HOME}/taurus",
+        // "SERVER_URL": "http://localhost:8000",
+        // "HOST_ID": "568d7f6e-2bf3-4556-bb0c-26105e35c5ec",
+        "HEALTH_CHECK_INTERVAL": "10",
+        "SUPERVISOR_HEARTBEAT_INTERVAL": "10",
+        "LOG_DIR": "${env:HOME}/taurus/logs",
+        "BACKUP_SERVERS": "[]",
+        // "REQUEST_SIGNING_SECRET": "dev-secret-key-for-testing",
+        "CONFIG_ENCRYPTION_ENABLED": "false",
+        "SSL_VERIFY": "false",
+      },
+      "justMyCode": false,
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "🔐 Taurus Auth: Python Debugger",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/taurus-auth/manage.py",
+      "cwd": "${workspaceFolder}/taurus-auth",
+      "env": {
+        "DJANGO_SETTINGS_MODULE": "taurus_auth.settings",
+        "DB_USER": "root",
+        "DB_PASSWORD": "123456",
+        "DB_NAME": "taurus_auth",
+        "DB_HOST": "localhost",
+        "DB_PORT": "3306",
+        "REDIS_URL": "redis://:123456@127.0.0.1:6379/1",
+        "BACKEND_JWT_SECRET": "your-jwt-secret-key-change-in-production",
+        "BACKEND_JWT_EXPIRES_MINUTES": "60",
+        "ALLOWED_BACKEND_IPS": "127.0.0.1",
+        "RATELIMIT_ENABLE": "True",
+        "RATELIMIT_RATE": "100/m",
+        "MACAROON_ROOT_KEY": "taurus_macaroon_root_key_change_in_production"
+      },
+      "args": [
+        "runserver",
+        "0.0.0.0:8001"
+      ],
+      "django": true,
+      "justMyCode": false
+    },
+    {
+      "name": "⏰ Taurus Scheduler: 调度引擎 (APScheduler)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "scheduler.main",
+      "cwd": "${workspaceFolder}/taurus-scheduler",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/taurus-scheduler",
+        "APP_NAME": "taurus-scheduler",
+        "LOG_LEVEL": "INFO",
+        "TIMEZONE": "Asia/Shanghai",
+        "SCHEDULER_INSTANCE_ID": "dev-local-01",
+        "SCHEDULER_JOB_SYNC_INTERVAL": "10",
+        "SCHEDULER_MISFIRE_GRACE_SECONDS": "3600",
+        "SCHEDULER_LEADER_LOCK_KEY": "taurus:scheduler:leader",
+        "SCHEDULER_LEADER_LOCK_TTL": "30",
+        "SCHEDULER_DEDUP_TTL": "600",
+        "REDIS_LOCK_PREFIX": "taurus:scheduler:lock:",
+        "REDIS_QUEUE_KEY": "taurus:scheduler:queue:script_task",
+        "REDIS_DEDUP_PREFIX": "taurus:scheduler:dedup:",
+        "DB_HOST": "127.0.0.1",
+        "DB_PORT": "3306",
+        "DB_USER": "root",
+        "DB_PASSWORD": "123456",
+        "DB_NAME": "taurus_backend",
+        "DB_TABLE_PREFIX": "taurus_",
+        "DB_CHARSET": "utf8mb4",
+        "REDIS_HOST": "127.0.0.1",
+        "REDIS_PORT": "6379",
+        "REDIS_PASSWORD": "123456",
+        "REDIS_DB": "2",
+        "BACKEND_API_BASE_URL": "http://127.0.0.1:8000",
+        "HEALTH_HOST": "0.0.0.0",
+        "HEALTH_PORT": "9101"
+      },
+      "justMyCode": false,
+      "console": "integratedTerminal",
+      "subProcess": true,
+      "redirectOutput": true
+    },
+    {
+      "name": "🧰 Taurus Scheduler Worker: 队列消费 (4 workers)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/taurus-backend/manage.py",
+      "cwd": "${workspaceFolder}/taurus-backend",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/taurus-backend",
+        "DJANGO_SETTINGS_MODULE": "application.settings",
+        "TAURUS_SCHEDULER_QUEUE": "taurus:scheduler:queue:script_task",
+        "TAURUS_SCHEDULER_DEDUP_PREFIX": "taurus:scheduler:dedup",
+        "REDIS_URL_SCHEDULER": "redis://:123456@127.0.0.1:6379/2"
+      },
+      "args": [
+        "run_scheduler_worker",
+        "--workers",
+        "4",
+        "--prefetch",
+        "8",
+        "--poll-interval",
+        "0.5"
+      ],
+      "django": true,
+      "justMyCode": false,
+      "console": "integratedTerminal",
+      "subProcess": true
+    },
+    {
+      "name": "🧰 Taurus Scheduler Worker: 高并发队列 (8 workers)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/taurus-backend/manage.py",
+      "cwd": "${workspaceFolder}/taurus-backend",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/taurus-backend",
+        "DJANGO_SETTINGS_MODULE": "application.settings",
+        "TAURUS_SCHEDULER_QUEUE": "taurus:scheduler:queue:script_task",
+        "REDIS_URL_SCHEDULER": "redis://:123456@127.0.0.1:6379/2"
+      },
+      "args": [
+        "run_scheduler_worker",
+        "--workers",
+        "8",
+        "--prefetch",
+        "16",
+        "--poll-interval",
+        "0.25"
+      ],
+      "django": true,
+      "justMyCode": false,
+      "console": "integratedTerminal",
+      "subProcess": true
+    },
+    {
+      "name": "🌐 Taurus Web: Node Debugger",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": [
+        "-c",
+        "source ~/.bashrc && pnpm dev"
+      ],
+      "cwd": "${workspaceFolder}/taurus-web",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "🌐 Taurus Web: Edge Debugger",
+      "type": "msedge",
+      "request": "launch",
+      "url": "http://localhost:8080",
+      "webRoot": "${workspaceFolder}/taurus-web",
+      "sourceMaps": true,
+      "sourceMapPathOverrides": {
+        "webpack:///./~/*": "${workspaceFolder}/taurus-web/node_modules/*",
+        "webpack:///./*": "${workspaceFolder}/taurus-web/*",
+        "webpack:///*": "*",
+        "webpack:///src/*": "${workspaceFolder}/taurus-web/src/*",
+        "webpack://*": "${workspaceFolder}/taurus-web/*"
+      },
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/taurus-web/**",
+        "!**/node_modules/**"
+      ],
+      "skipFiles": [
+        "${workspaceFolder}/taurus-web/node_modules/**/*.js",
+        "<node_internals>/**/*.js"
+      ],
+      "userDataDir": "${workspaceFolder}/taurus-web/.vscode/edge-debug-profile",
+      "trace": true,
+      "disableNetworkCache": true,
+      "cleanUp": "onlyTab"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "⏰ 定时任务解耦全栈 (Scheduler + Worker)",
+      "configurations": [
+        "⏰ Taurus Scheduler: 调度引擎 (APScheduler)",
+        "🧰 Taurus Scheduler Worker: 队列消费 (4 workers)"
+      ],
+      "stopAll": true
+    },
+    {
+      "name": "🚀 完整开发环境 (Django + WebSocket)",
+      "configurations": [
+        "🐍 Taurus Backend: Python Debugger",
+        "🔌 Taurus WebSocket: Python Debugger"
+      ],
+      "stopAll": true
+    },
+    {
+      "name": "🚀 完整开发环境 + 定时任务 (Django + WS + Scheduler)",
+      "configurations": [
+        "🐍 Taurus Backend: Python Debugger",
+        "🔌 Taurus WebSocket: Python Debugger",
+        "⏰ Taurus Scheduler: 调度引擎 (APScheduler)",
+        "🧰 Taurus Scheduler Worker: 队列消费 (4 workers)"
+      ],
+      "stopAll": true
+    },
+    {
+      "name": "🌐 全栈开发 (Django + WebSocket + Web UI)",
+      "configurations": [
+        "🐍 Taurus Backend: Python Debugger",
+        "🔌 Taurus WebSocket: Python Debugger",
+        "🌐 Taurus Web: Node Debugger"
+      ],
+      "stopAll": true
+    },
+    {
+      "name": "🌐 全栈开发 + 定时任务 (Django + WS + Web + Scheduler)",
+      "configurations": [
+        "🐍 Taurus Backend: Python Debugger",
+        "🔌 Taurus WebSocket: Python Debugger",
+        "🌐 Taurus Web: Node Debugger",
+        "⏰ Taurus Scheduler: 调度引擎 (APScheduler)",
+        "🧰 Taurus Scheduler Worker: 队列消费 (4 workers)"
+      ],
+      "stopAll": true
+    },
+    {
+      "name": "🖥️ 全栈开发 + Edge 浏览器",
+      "configurations": [
+        "🐍 Taurus Backend: Python Debugger",
+        "🔌 Taurus WebSocket: Python Debugger",
+        "🌐 Taurus Web: Node Debugger",
+        "🌐 Taurus Web: Edge Debugger"
+      ],
+      "stopAll": true
+    },
+    {
+      "name": "🔐 票据鉴权开发 (Backend + Auth + Executor)",
+      "configurations": [
+        "🐍 Taurus Backend: Python Debugger",
+        "🔐 Taurus Auth: Python Debugger",
+        "⚙️ Taurus Executor: Python Debugger"
+      ],
+      "stopAll": true
+    }
+  ]
+}
