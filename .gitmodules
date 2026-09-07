@@ -1,18 +1,21 @@
-[submodule "taurus-backend"]
-	path = taurus-backend
-	url = https://github.com/taurus-stack/taurus-backend
 [submodule "taurus-executor"]
 	path = taurus-executor
-	url = https://github.com/taurus-stack/taurus-executor
+	url = git@github.com:taurus-stack/taurus-executor.git
 [submodule "taurus-web"]
 	path = taurus-web
-	url = https://github.com/taurus-stack/taurus-web
+	url = git@github.com:taurus-stack/taurus-web.git
 [submodule "taurus-supervisor"]
 	path = taurus-supervisor
-	url = https://github.com/taurus-stack/taurus-supervisor
+	url = git@github.com:taurus-stack/taurus-supervisor.git
 [submodule "taurus-scheduler"]
 	path = taurus-scheduler
-	url = https://github.com/taurus-stack/taurus-scheduler
+	url = git@github.com:taurus-stack/taurus-scheduler.git
 [submodule "taurus-auth"]
 	path = taurus-auth
-	url = https://github.com/taurus-stack/taurus-auth
+	url = git@github.com:taurus-stack/taurus-auth.git
+[submodule "taurus-portal"]
+	path = taurus-portal
+	url = git@github.com:taurus-stack/taurus-portal.git
+[submodule "taurus-backend"]
+	path = taurus-backend
+	url = git@github.com:taurus-stack/taurus-backend.git
