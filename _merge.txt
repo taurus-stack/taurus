@@ -1,0 +1,152 @@
+=== 合并 origin/main 进 feat/1.0.0 ===
+冲突（修改/删除）：.env.example 在 origin/main 中被删除，在 HEAD 中被修改。.env.example 的 HEAD 版本在树中被保留。
+冲突（修改/删除）：.github/workflows/deploy-pages.yml 在 origin/main 中被删除，在 HEAD 中被修改。.github/workflows/deploy-pages.yml 的 HEAD 版本在树中被保留。
+冲突（修改/删除）：index.html 在 origin/main 中被删除，在 HEAD 中被修改。index.html 的 HEAD 版本在树中被保留。
+冲突（修改/删除）：package.json 在 origin/main 中被删除，在 HEAD 中被修改。package.json 的 HEAD 版本在树中被保留。
+冲突（修改/删除）：pnpm-lock.yaml 在 origin/main 中被删除，在 HEAD 中被修改。pnpm-lock.yaml 的 HEAD 版本在树中被保留。
+冲突（修改/删除）：scripts/check-dist.mjs 在 origin/main 中被删除，在 HEAD 中被修改。scripts/check-dist.mjs 的 HEAD 版本在树中被保留。
+冲突（修改/删除）：src/i18n/locales/en/contactForm.ts 在 origin/main 中被删除，在 HEAD 中被修改。src/i18n/locales/en/contactForm.ts 的 HEAD 版本在树中被保留。
+冲突（修改/删除）：src/i18n/locales/en/views.ts 在 origin/main 中被删除，在 HEAD 中被修改。src/i18n/locales/en/views.ts 的 HEAD 版本在树中被保留。
+冲突（修改/删除）：src/i18n/locales/zh-cn/contactForm.ts 在 origin/main 中被删除，在 HEAD 中被修改。src/i18n/locales/zh-cn/contactForm.ts 的 HEAD 版本在树中被保留。
+冲突（修改/删除）：src/i18n/locales/zh-cn/views.ts 在 origin/main 中被删除，在 HEAD 中被修改。src/i18n/locales/zh-cn/views.ts 的 HEAD 版本在树中被保留。
+冲突（修改/删除）：src/i18n/locales/zh-tw/contactForm.ts 在 origin/main 中被删除，在 HEAD 中被修改。src/i18n/locales/zh-tw/contactForm.ts 的 HEAD 版本在树中被保留。
+冲突（修改/删除）：src/i18n/locales/zh-tw/views.ts 在 origin/main 中被删除，在 HEAD 中被修改。src/i18n/locales/zh-tw/views.ts 的 HEAD 版本在树中被保留。
+冲突（修改/删除）：src/router/index.ts 在 origin/main 中被删除，在 HEAD 中被修改。src/router/index.ts 的 HEAD 版本在树中被保留。
+冲突（修改/删除）：src/views/HomeView.vue 在 origin/main 中被删除，在 HEAD 中被修改。src/views/HomeView.vue 的 HEAD 版本在树中被保留。
+冲突（修改/删除）：vite.config.ts 在 origin/main 中被删除，在 HEAD 中被修改。vite.config.ts 的 HEAD 版本在树中被保留。
+自动合并失败，修正冲突然后提交修正的结果。
+
+=== 合并后状态 ===
+A  .claude/settings.local.json
+D  .dockerignore
+D  .env.development
+UD .env.example
+D  .env.production
+UD .github/workflows/deploy-pages.yml
+M  .gitignore
+A  .gitmodules
+D  .lintstagedrc.json
+A  .marscode/deviceInfo.json
+D  .prettierignore
+D  .prettierrc.json
+D  .simple-git-hooks.json
+A  .vscode/bash_taurus.sh
+A  .vscode/launch.json
+A  .vscode/settings.json
+A  .vscode/tasks.json
+A  .vscode/taurus.code-profile
+D  CHANGELOG.md
+D  CHANGELOG.zh-CN.md
+A  CONTRIBUTING.md
+A  CONTRIBUTING.zh-CN.md
+D  Dockerfile
+A  LICENSE
+D  README.en.md
+M  README.md
+A  README.zh-CN.md
+A  docker-compose.scheduler.yml
+A  docs/architecture.md
+A  docs/architecture.zh-CN.md
+A  docs/editions.md
+A  docs/editions.zh-CN.md
+A  docs/permission-system-summary.md
+D  eslint.config.mjs
+R  src/assets/img/execution-log.png -> img/execution-log.png
+R  src/assets/img/execution-records.png -> img/execution-records.png
+R  src/assets/img/heartbeat-hosts.png -> img/heartbeat-hosts.png
+R  src/assets/img/heartbeat-record.png -> img/heartbeat-record.png
+R  src/assets/img/home.png -> img/home.png
+R  src/assets/img/job-exec-detail.png -> img/job-exec-detail.png
+R  src/assets/img/job-management.png -> img/job-management.png
+R  src/assets/img/job-node-exec-detail.png -> img/job-node-exec-detail.png
+R  src/assets/img/my-host.png -> img/my-host.png
+R  src/assets/img/program-commands.png -> img/program-commands.png
+R  src/assets/img/registration-token.png -> img/registration-token.png
+R  src/assets/img/rerun.png -> img/rerun.png
+R  src/assets/img/run-command.png -> img/run-command.png
+R  src/assets/img/run-detail.png -> img/run-detail.png
+R  src/assets/img/run-script.png -> img/run-script.png
+R  src/assets/img/script-library.png -> img/script-library.png
+UD index.html
+D  nginx.conf
+UD package.json
+UD pnpm-lock.yaml
+D  pnpm-workspace.yaml
+D  public/favicon.ico
+D  public/robots.txt
+D  public/sitemap.xml
+A  scripts/.gitignore
+UD scripts/check-dist.mjs
+D  src/App.vue
+D  src/api/contact.ts
+D  src/assets/img/wechat.png
+D  src/assets/logo.svg
+D  src/components/layout/Footer.vue
+D  src/components/layout/NavBar.vue
+D  src/components/sections/Architecture.vue
+D  src/components/sections/ContactForm.vue
+D  src/components/sections/Features.vue
+D  src/components/sections/Hero.vue
+D  src/components/sections/Overview.vue
+D  src/components/sections/ProductShowcase.vue
+D  src/components/sections/ScreenshotsPreview.vue
+D  src/components/sections/Solutions.vue
+D  src/components/sections/Testimonials.vue
+D  src/i18n/_debug_parse.json
+D  src/i18n/en.ts
+D  src/i18n/index.ts
+D  src/i18n/locales/en/common.ts
+UD src/i18n/locales/en/contactForm.ts
+D  src/i18n/locales/en/footer.ts
+D  src/i18n/locales/en/hero.ts
+D  src/i18n/locales/en/homeSections.ts
+D  src/i18n/locales/en/index.ts
+D  src/i18n/locales/en/locale.ts
+D  src/i18n/locales/en/nav.ts
+UD src/i18n/locales/en/views.ts
+D  src/i18n/locales/zh-cn/common.ts
+UD src/i18n/locales/zh-cn/contactForm.ts
+D  src/i18n/locales/zh-cn/footer.ts
+D  src/i18n/locales/zh-cn/hero.ts
+D  src/i18n/locales/zh-cn/homeSections.ts
+D  src/i18n/locales/zh-cn/index.ts
+D  src/i18n/locales/zh-cn/locale.ts
+D  src/i18n/locales/zh-cn/nav.ts
+UD src/i18n/locales/zh-cn/views.ts
+D  src/i18n/locales/zh-tw/common.ts
+UD src/i18n/locales/zh-tw/contactForm.ts
+D  src/i18n/locales/zh-tw/footer.ts
+D  src/i18n/locales/zh-tw/hero.ts
+D  src/i18n/locales/zh-tw/homeSections.ts
+D  src/i18n/locales/zh-tw/index.ts
+D  src/i18n/locales/zh-tw/locale.ts
+D  src/i18n/locales/zh-tw/nav.ts
+UD src/i18n/locales/zh-tw/views.ts
+D  src/i18n/zh-cn.ts
+D  src/i18n/zh-tw.ts
+D  src/main.ts
+UD src/router/index.ts
+D  src/shims.d.ts
+D  src/stores/locale.ts
+D  src/stores/theme.ts
+D  src/styles/global.scss
+D  src/styles/reset.scss
+D  src/styles/variables.scss
+D  src/types/index.ts
+D  src/views/AboutView.vue
+D  src/views/DocsView.vue
+D  src/views/DownloadView.vue
+UD src/views/HomeView.vue
+D  src/views/NotFoundView.vue
+D  src/views/ProductView.vue
+D  src/views/SolutionsView.vue
+A  taurus-auth
+A  taurus-backend
+A  taurus-executor
+A  taurus-portal
+A  taurus-scheduler
+A  taurus-supervisor
+A  taurus-web
+D  tsconfig.json
+D  tsconfig.node.json
+UD vite.config.ts
