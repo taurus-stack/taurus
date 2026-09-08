@@ -1,0 +1,385 @@
+# Taurus Stack - 全服务编排
+#
+# 应用服务：
+#   taurus-web                前端管理界面（nginx + Vue3 SPA，端口 80）
+#   taurus-backend            后端 API（Django 4.2 + gunicorn，端口 8000）
+#   taurus-websocket          WebSocket 服务（纯 asyncio，端口 8765）
+#   taurus-workflow-scheduler 工作流推进守护进程（run_workflow_scheduler）
+#   taurus-executor           客户端执行器（gRPC + mTLS，端口 50051）
+#   taurus-auth               票据鉴权服务（Django 独立服务，端口 8001）
+#   taurus-supervisor         主机守护进程（asyncio，共享 executor PID/Network namespace）
+#   taurus-scheduler          独立调度服务（APScheduler + Leader Election，端口 9101）
+#   taurus-scheduler-worker   调度 Worker（复用 backend 镜像，BRPOP 消费 Redis 队列）
+#
+# 基础设施：
+#   mysql   MySQL 8.0（backend + auth + scheduler 共享）
+#   redis   Redis 7.2（缓存 + Scheduler 队列 + 分布式锁）
+#
+# 启动：
+#   docker compose up -d --build
+#
+# 验证：
+#   curl http://localhost/              → 前端页面
+#   curl http://localhost/api/health/   → 后端 API
+#   curl http://localhost:8765/         → WebSocket 服务
+#   curl http://localhost:8001/health/  → Auth 服务
+#   curl http://localhost:9101/health   → Scheduler 健康检查
+#   curl http://localhost:50051/        → Executor gRPC
+
+services:
+  # ==================== 应用服务 ====================
+
+  taurus-web:
+    build:
+      context: ./taurus-web
+      dockerfile: Dockerfile
+    image: taurus-web:latest
+    container_name: taurus-web
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    environment:
+      NODE_ENV: production
+    depends_on:
+      taurus-backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    networks:
+      - taurus-net
+
+  taurus-backend:
+    build:
+      context: ./taurus-backend
+      dockerfile: Dockerfile
+    image: taurus-backend:latest
+    container_name: taurus-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      DJANGO_SETTINGS_MODULE: application.settings
+      DATABASE_ENGINE: django.db.backends.mysql
+      DATABASE_HOST: mysql
+      DATABASE_PORT: "3306"
+      DATABASE_USER: root
+      DATABASE_PASSWORD: ${DB_PASSWORD:-taurus}
+      DATABASE_NAME: taurus_backend
+      TABLE_PREFIX: taurus_
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      REDIS_URL: redis://redis:6379/1
+      CELERY_BROKER_URL: redis://redis:6379/3
+      DEBUG: "False"
+      ALLOWED_HOSTS: "*"
+      TAURUS_AUTH_URL: http://taurus-auth:8001
+      TZ: Asia/Shanghai
+    volumes:
+      - ./taurus-backend/certs:/app/certs:ro
+      - backend-media:/app/media
+      - backend-logs:/app/logs
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health/')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    networks:
+      - taurus-net
+
+  taurus-websocket:
+    image: taurus-backend:latest
+    container_name: taurus-websocket
+    restart: unless-stopped
+    ports:
+      - "8765:8765"
+    entrypoint: [
+      "python", "manage.py", "run_websocket_server",
+      "--host", "0.0.0.0", "--port", "8765"
+    ]
+    environment:
+      DJANGO_SETTINGS_MODULE: application.settings
+      DATABASE_HOST: mysql
+      DATABASE_PORT: "3306"
+      DATABASE_USER: root
+      DATABASE_PASSWORD: ${DB_PASSWORD:-taurus}
+      DATABASE_NAME: taurus_backend
+      REDIS_URL: redis://redis:6379/1
+      WEBSOCKET_HOST: 0.0.0.0
+      WEBSOCKET_PORT: "8765"
+      TZ: Asia/Shanghai
+    volumes:
+      - ./taurus-backend/certs:/app/certs:ro
+    depends_on:
+      taurus-backend:
+        condition: service_healthy
+    networks:
+      - taurus-net
+
+  taurus-workflow-scheduler:
+    image: taurus-backend:latest
+    container_name: taurus-workflow-scheduler
+    restart: unless-stopped
+    entrypoint: [
+      "python", "manage.py", "run_workflow_scheduler",
+      "--interval", "3", "--batch-size", "50"
+    ]
+    environment:
+      DJANGO_SETTINGS_MODULE: application.settings
+      DATABASE_HOST: mysql
+      DATABASE_PORT: "3306"
+      DATABASE_USER: root
+      DATABASE_PASSWORD: ${DB_PASSWORD:-taurus}
+      DATABASE_NAME: taurus_backend
+      REDIS_URL: redis://redis:6379/1
+      TZ: Asia/Shanghai
+    volumes:
+      - ./taurus-backend/certs:/app/certs:ro
+    depends_on:
+      taurus-backend:
+        condition: service_healthy
+    networks:
+      - taurus-net
+
+  taurus-executor:
+    build:
+      context: ./taurus-executor
+      dockerfile: Dockerfile
+    image: taurus-executor:latest
+    container_name: taurus-executor
+    restart: unless-stopped
+    ports:
+      - "50051:50051"
+    environment:
+      GRPC_HOST: 0.0.0.0
+      GRPC_PORT: "50051"
+      LOG_LEVEL: INFO
+      LOG_FORMAT: json
+      TAURUS_SERVER_URL: http://taurus-backend:8000
+      TAURUS_AUTH_URL: http://taurus-auth:8001
+      TAURUS_HOST_UUID: ${EXECUTOR_HOST_UUID:-docker-host-001}
+    volumes:
+      - ./taurus-executor/tls:/opt/taurus-executor/tls:ro
+      - executor-data:/opt/taurus-executor/data
+      - executor-versions:/opt/taurus/versions
+    depends_on:
+      taurus-backend:
+        condition: service_healthy
+      taurus-auth:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:50051/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+    networks:
+      - taurus-net
+
+  taurus-auth:
+    build:
+      context: ./taurus-auth
+      dockerfile: Dockerfile
+    image: taurus-auth:latest
+    container_name: taurus-auth
+    restart: unless-stopped
+    ports:
+      - "8001:8001"
+    environment:
+      DB_ENGINE: django.db.backends.mysql
+      DB_NAME: taurus_auth
+      DB_USER: root
+      DB_PASSWORD: ${DB_PASSWORD:-taurus}
+      DB_HOST: mysql
+      DB_PORT: "3306"
+      REDIS_URL: redis://redis:6379/1
+      BACKEND_JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
+      BACKEND_JWT_EXPIRES_MINUTES: "60"
+      ALLOWED_BACKEND_IPS: ""
+      ALLOWED_BACKEND_SERVICES: taurus-backend
+      RATELIMIT_ENABLE: "True"
+      RATELIMIT_RATE: 100/m
+      MACAROON_ROOT_KEY: ${MACAROON_ROOT_KEY:-change-me-in-production}
+      TICKET_DEFAULT_EXPIRES_MINUTES: "5"
+      TICKET_MAX_EXPIRES_MINUTES: "60"
+      SECRET_KEY: ${AUTH_SECRET_KEY:-change-me-in-production}
+      DEBUG: "False"
+      ALLOWED_HOSTS: "*"
+      TZ: Asia/Shanghai
+    volumes:
+      - auth-logs:/app/logs
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health/')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - taurus-net
+
+  taurus-supervisor:
+    build:
+      context: ./taurus-supervisor
+      dockerfile: Dockerfile
+    image: taurus-supervisor:latest
+    container_name: taurus-supervisor
+    restart: unless-stopped
+    pid: "service:taurus-executor"
+    network_mode: "service:taurus-executor"
+    environment:
+      SERVER_URL: http://taurus-backend:8000
+      HOST_ID: ${SUPERVISOR_HOST_ID:-supervisor-001}
+      REQUEST_SIGNING_SECRET: ${SUPERVISOR_SIGNING_SECRET:-}
+      SUPERVISOR_SSL_VERIFY: "false"
+      LOG_DIR: /var/log/taurus-supervisor
+      LOG_MIN_LEVEL: INFO
+      TZ: Asia/Shanghai
+    volumes:
+      - supervisor-logs:/var/log/taurus-supervisor
+      - supervisor-data:/opt/taurus
+      - executor-versions:/opt/taurus/versions
+    depends_on:
+      taurus-backend:
+        condition: service_healthy
+      taurus-executor:
+        condition: service_healthy
+
+  taurus-scheduler:
+    build:
+      context: ./taurus-scheduler
+      dockerfile: Dockerfile
+    image: taurus-scheduler:latest
+    container_name: taurus-scheduler
+    restart: unless-stopped
+    ports:
+      - "9101:9101"
+    environment:
+      SCHEDULER_INSTANCE_ID: scheduler-01
+      LOG_LEVEL: INFO
+      DB_HOST: mysql
+      DB_PORT: "3306"
+      DB_USER: root
+      DB_PASSWORD: ${DB_PASSWORD:-taurus}
+      DB_NAME: taurus_backend
+      DB_TABLE_PREFIX: taurus_
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      REDIS_DB: "2"
+      SCHEDULER_JOB_SYNC_INTERVAL: "10"
+      SCHEDULER_MISFIRE_GRACE_SECONDS: "3600"
+      SCHEDULER_LEADER_LOCK_TTL: "30"
+      SCHEDULER_DEDUP_TTL: "600"
+      BACKEND_API_BASE_URL: http://taurus-backend:8000
+      HEALTH_HOST: 0.0.0.0
+      HEALTH_PORT: "9101"
+      TIMEZONE: Asia/Shanghai
+      TZ: Asia/Shanghai
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - taurus-net
+
+  taurus-scheduler-worker:
+    image: taurus-backend:latest
+    container_name: taurus-scheduler-worker
+    restart: unless-stopped
+    entrypoint: [
+      "bash", "-c",
+      "cd /app && python manage.py run_scheduler_worker --workers 4"
+    ]
+    environment:
+      DJANGO_SETTINGS_MODULE: application.settings
+      DATABASE_HOST: mysql
+      DATABASE_PORT: "3306"
+      DATABASE_USER: root
+      DATABASE_PASSWORD: ${DB_PASSWORD:-taurus}
+      DATABASE_NAME: taurus_backend
+      REDIS_URL_SCHEDULER: redis://redis:6379/2
+      WORKER_CONCURRENCY: "4"
+      TAURUS_SCHEDULER_QUEUE: "taurus:scheduler:queue:script_task"
+      TZ: Asia/Shanghai
+    volumes:
+      - ./taurus-backend/certs:/app/certs:ro
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      taurus-scheduler:
+        condition: service_started
+    networks:
+      - taurus-net
+
+  # ==================== 基础设施 ====================
+
+  mysql:
+    image: mysql:8.0
+    container_name: taurus-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-taurus}
+      MYSQL_DATABASE: taurus_backend
+      TZ: Asia/Shanghai
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - taurus-net
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: taurus-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "512mb", "--maxmemory-policy", "noeviction"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - taurus-net
+
+volumes:
+  mysql-data:
+  redis-data:
+  backend-media:
+  backend-logs:
+  auth-logs:
+  supervisor-logs:
+  supervisor-data:
+  executor-data:
+  executor-versions:
+
+networks:
+  taurus-net:
+    driver: bridge
