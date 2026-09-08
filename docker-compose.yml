@@ -213,6 +213,7 @@ services:
       MACAROON_ROOT_KEY: ${MACAROON_ROOT_KEY:-change-me-in-production}
       TICKET_DEFAULT_EXPIRES_MINUTES: ${TICKET_DEFAULT_EXPIRES_MINUTES:-5}
       TICKET_MAX_EXPIRES_MINUTES: ${TICKET_MAX_EXPIRES_MINUTES:-60}
+      BACKEND_SERVICE_TOKEN: ${BACKEND_SERVICE_TOKEN:-change-me-in-production}
       SECRET_KEY: ${AUTH_SECRET_KEY:-change-me-in-production}
       DEBUG: "False"
       ALLOWED_HOSTS: "*"
@@ -342,13 +343,14 @@ services:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-taurus}
       MYSQL_DATABASE: taurus_backend
       TZ: Asia/Shanghai
-    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
+      DB_PORT: ${DB_PORT:-3306}
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci", "--port=${DB_PORT:-3306}"]
     ports:
-      - "3306:3306"
+      - "${DB_PORT:-3306}:${DB_PORT:-3306}"
     volumes:
       - mysql-data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -P $$DB_PORT"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -359,13 +361,24 @@ services:
     image: redis:7.2-alpine
     container_name: taurus-redis
     restart: unless-stopped
-    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "512mb", "--maxmemory-policy", "noeviction"]
+    environment:
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+    command:
+      - sh
+      - -c
+      - |
+        if [ -n "$$REDIS_PASSWORD" ]; then
+          exec redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy noeviction --port "$$REDIS_PORT" --requirepass "$$REDIS_PASSWORD"
+        else
+          exec redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy noeviction --port "$$REDIS_PORT"
+        fi
     ports:
-      - "6379:6379"
+      - "${REDIS_PORT:-6379}:${REDIS_PORT:-6379}"
     volumes:
       - redis-data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD-SHELL", "if [ -n \"$$REDIS_PASSWORD\" ]; then redis-cli -a \"$$REDIS_PASSWORD\" -p $$REDIS_PORT ping; else redis-cli -p $$REDIS_PORT ping; fi"]
       interval: 10s
       timeout: 5s
       retries: 5
