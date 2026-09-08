@@ -64,17 +64,17 @@ services:
     environment:
       DJANGO_SETTINGS_MODULE: application.settings
       DATABASE_ENGINE: django.db.backends.mysql
-      DATABASE_HOST: mysql
-      DATABASE_PORT: "3306"
-      DATABASE_USER: root
+      DATABASE_HOST: ${DB_HOST:-mysql}
+      DATABASE_PORT: ${DB_PORT:-3306}
+      DATABASE_USER: ${DB_USER:-root}
       DATABASE_PASSWORD: ${DB_PASSWORD:-taurus}
-      DATABASE_NAME: taurus_backend
+      DATABASE_NAME: ${DB_NAME_BACKEND:-taurus_backend}
       TABLE_PREFIX: taurus_
-      REDIS_HOST: redis
-      REDIS_PORT: "6379"
+      REDIS_HOST: ${REDIS_HOST:-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
       REDIS_PASSWORD: ${REDIS_PASSWORD:-}
-      REDIS_URL: redis://redis:6379/1
-      CELERY_BROKER_URL: redis://redis:6379/3
+      REDIS_URL: redis://${REDIS_HOST:-redis}:${REDIS_PORT:-6379}/1
+      CELERY_BROKER_URL: redis://${REDIS_HOST:-redis}:${REDIS_PORT:-6379}/3
       DEBUG: "False"
       ALLOWED_HOSTS: "*"
       TAURUS_EDITION: ${TAURUS_EDITION:-community}
@@ -110,12 +110,12 @@ services:
     ]
     environment:
       DJANGO_SETTINGS_MODULE: application.settings
-      DATABASE_HOST: mysql
-      DATABASE_PORT: "3306"
-      DATABASE_USER: root
+      DATABASE_HOST: ${DB_HOST:-mysql}
+      DATABASE_PORT: ${DB_PORT:-3306}
+      DATABASE_USER: ${DB_USER:-root}
       DATABASE_PASSWORD: ${DB_PASSWORD:-taurus}
-      DATABASE_NAME: taurus_backend
-      REDIS_URL: redis://redis:6379/1
+      DATABASE_NAME: ${DB_NAME_BACKEND:-taurus_backend}
+      REDIS_URL: redis://${REDIS_HOST:-redis}:${REDIS_PORT:-6379}/1
       WEBSOCKET_HOST: ${WEBSOCKET_HOST:-0.0.0.0}
       WEBSOCKET_PORT: ${WEBSOCKET_PORT:-8765}
       TZ: Asia/Shanghai
@@ -137,12 +137,12 @@ services:
     ]
     environment:
       DJANGO_SETTINGS_MODULE: application.settings
-      DATABASE_HOST: mysql
-      DATABASE_PORT: "3306"
-      DATABASE_USER: root
+      DATABASE_HOST: ${DB_HOST:-mysql}
+      DATABASE_PORT: ${DB_PORT:-3306}
+      DATABASE_USER: ${DB_USER:-root}
       DATABASE_PASSWORD: ${DB_PASSWORD:-taurus}
-      DATABASE_NAME: taurus_backend
-      REDIS_URL: redis://redis:6379/1
+      DATABASE_NAME: ${DB_NAME_BACKEND:-taurus_backend}
+      REDIS_URL: redis://${REDIS_HOST:-redis}:${REDIS_PORT:-6379}/1
       TZ: Asia/Shanghai
     volumes:
       - ./taurus-backend/certs:/app/certs:ro
@@ -198,12 +198,12 @@ services:
       - "8001:8001"
     environment:
       DB_ENGINE: django.db.backends.mysql
-      DB_NAME: taurus_auth
-      DB_USER: root
+      DB_NAME: ${DB_NAME_AUTH:-taurus_auth}
+      DB_USER: ${DB_USER:-root}
       DB_PASSWORD: ${DB_PASSWORD:-taurus}
-      DB_HOST: mysql
-      DB_PORT: "3306"
-      REDIS_URL: redis://redis:6379/1
+      DB_HOST: ${DB_HOST:-mysql}
+      DB_PORT: ${DB_PORT:-3306}
+      REDIS_URL: redis://${REDIS_HOST:-redis}:${REDIS_PORT:-6379}/1
       BACKEND_JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
       BACKEND_JWT_EXPIRES_MINUTES: ${BACKEND_JWT_EXPIRES_MINUTES:-60}
       ALLOWED_BACKEND_IPS: ""
@@ -274,14 +274,14 @@ services:
     environment:
       SCHEDULER_INSTANCE_ID: ${SCHEDULER_INSTANCE_ID:-scheduler-01}
       LOG_LEVEL: INFO
-      DB_HOST: mysql
-      DB_PORT: "3306"
-      DB_USER: root
+      DB_HOST: ${DB_HOST:-mysql}
+      DB_PORT: ${DB_PORT:-3306}
+      DB_USER: ${DB_USER:-root}
       DB_PASSWORD: ${DB_PASSWORD:-taurus}
-      DB_NAME: taurus_backend
+      DB_NAME: ${DB_NAME_BACKEND:-taurus_backend}
       DB_TABLE_PREFIX: taurus_
-      REDIS_HOST: redis
-      REDIS_PORT: "6379"
+      REDIS_HOST: ${REDIS_HOST:-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
       REDIS_PASSWORD: ${REDIS_PASSWORD:-}
       REDIS_DB: "2"
       SCHEDULER_JOB_SYNC_INTERVAL: ${SCHEDULER_JOB_SYNC_INTERVAL:-10}
@@ -311,12 +311,12 @@ services:
     ]
     environment:
       DJANGO_SETTINGS_MODULE: application.settings
-      DATABASE_HOST: mysql
-      DATABASE_PORT: "3306"
-      DATABASE_USER: root
+      DATABASE_HOST: ${DB_HOST:-mysql}
+      DATABASE_PORT: ${DB_PORT:-3306}
+      DATABASE_USER: ${DB_USER:-root}
       DATABASE_PASSWORD: ${DB_PASSWORD:-taurus}
-      DATABASE_NAME: taurus_backend
-      REDIS_URL_SCHEDULER: redis://redis:6379/2
+      DATABASE_NAME: ${DB_NAME_BACKEND:-taurus_backend}
+      REDIS_URL_SCHEDULER: redis://${REDIS_HOST:-redis}:${REDIS_PORT:-6379}/2
       WORKER_CONCURRENCY: ${WORKER_CONCURRENCY:-4}
       TAURUS_SCHEDULER_QUEUE: ${TAURUS_SCHEDULER_QUEUE:-taurus:scheduler:queue:script_task}
       TZ: Asia/Shanghai
