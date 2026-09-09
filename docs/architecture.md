@@ -31,16 +31,9 @@
 │   │                   Taurus Backend (Django 4.2)              │          │
 │   │                                                             │          │
 │   │  ┌──────────────┐  ┌──────────────┐  ┌──────────────────┐ │          │
-│   │  │ Edition Gate │  │  Workflow    │  │  Scheduler       │ │          │
-│   │  │ (Community   │  │  Engine      │  │  Handler         │ │          │
-│   │  │  vs Ent)     │  │              │  │                  │ │          │
-│   │  └──────┬───────┘  └──────┬───────┘  └────────┬─────────┘ │          │
-│   │         │                  │                  │            │          │
-│   │  ┌──────▼──────────────────▼──────────────────▼─────────┐  │          │
-│   │  │                  taurus_ee (Enterprise Only)         │  │          │
-│   │  │  • Approval Engine  • Notification  • HA Scheduler   │  │          │
-│   │  │  • Policy Engine   • DAG Units      • Program MGMT    │  │          │
-│   │  └──────────────────────────────────────────────────────┘  │          │
+│   │  │  Workflow    │  │  Scheduler   │  │  Approval        │ │          │
+│   │  │  Engine      │  │  Handler     │  │  Program MGMT    │ │          │
+│   │  └──────────────┘  └──────────────┘  └──────────────────┘ │          │
 │   │                                                             │          │
 │   │  ┌──────────────────────────────────────────────────────┐  │          │
 │   │  │            Database (MySQL/MariaDB 8.0+)             │  │          │
@@ -158,11 +151,10 @@ Web: POST /api/taurus/session/  (HTTP + JWT)
     │
     ▼
 Backend: SessionViewSet.create()
-    │  1. Check has_feature("COMMAND_SINGLE")
-    │  2. Check host online
-    │  3. Generate execution ticket (via taurus-auth)
-    │  4. Create Session record (status=RUNNING)
-    │  5. gRPC call to Executor
+    │  1. Check host online
+    │  2. Generate execution ticket (via taurus-auth)
+    │  3. Create Session record (status=RUNNING)
+    │  4. gRPC call to Executor
     │
     ▼
 Executor: CommandService.Run()
@@ -181,8 +173,7 @@ Web: Terminal component renders output
 
 | Layer | Class | Location |
 |-------|-------|----------|
-| API | `SessionViewSet` | `taurus/views.py` (thin wrapper → `taurus_ee/`) |
-| Auth | `ee_service_or_403` | `taurus/ee_fallback.py` (CE stub) / `taurus_ee/utils/gate.py` (EE) |
+| API | `SessionViewSet` | `taurus/views.py` |
 | gRPC | `GrpcExecutorClient` | `taurus/utils/grpc_client.py` |
 | Ticket | `auth_jwt.issue_ticket` | `taurus/utils/auth_jwt.py` |
 | Model | `Host`, `Session` | `taurus/models.py` |
@@ -206,7 +197,7 @@ ScriptTask discovered
         └─ POST /api/taurus/script_task/<id>/execute/ → Backend runs directly
 ```
 
-### HA Scheduler (Enterprise Only)
+### HA Scheduler
 
 ```
 Node A (Leader)          Redis                    Node B (Follower)
@@ -236,10 +227,9 @@ Web: Design Workflow DAG
     │  • Connect with edges (serial / parallel)
     │
     ▼
-Backend: WorkflowEngine (taurus_ee/services/workflow_approval_engine.py)
+Backend: WorkflowEngine
     │  1. Validate DAG (cycles, unreachable nodes)
-    │  2. Check has_feature("WORKFLOW_EXECUTION")
-    │  3. Save WorkflowDefinition (JSON)
+    │  2. Save WorkflowDefinition (JSON)
     │
     ▼
 Web: Run Workflow
@@ -275,20 +265,12 @@ Layer 2: Transport Authentication
   └── Backend ↔ Supervisor: HMAC-SHA256 (per-host secret)
   └── Backend ↔ Auth: Pre-shared service secret
 
-Layer 3: License Gate (Enterprise Only)
-  └── RSA-PSS-SHA256 signed license file
-  └── Dual-condition: edition == "enterprise" AND license.valid == True
-  └── Machine fingerprint binding (optional)
-  └── Tamper detection via canonicalized JSON
-
-Layer 4: Authorization
+Layer 3: Authorization
   └── Role-based access control (RBAC) with custom permission codes
-  └── Script approval workflow (Enterprise)
   └── IP whitelisting
 
-Layer 5: Audit
+Layer 4: Audit
   └── All operations logged (command output, session, approval decisions)
-  └── Log forwarding to external SIEM (Enterprise)
 ```
 
 ### Certificate Lifecycle
@@ -318,19 +300,19 @@ Revocation: ca.crl updated by issuer, deployed to all services
 
 ## Database Schema (High Level)
 
-Core tables shared between CE and EE:
+Core tables:
 
-| Table | Description | CE? | EE? |
-|-------|-------------|-----|-----|
-| `host_host` | Registered remote hosts | ✅ | ✅ |
-| `host_session` | Command execution sessions | ✅ | ✅ |
-| `host_program` | Installed programs on hosts | ✅ | ✅ |
-| `host_log` | Centralized host logs | ✅ | ✅ |
-| `script_scripttask` | Scheduled scripts | ✅ | ✅ |
-| `script_script` | Saved script content | ✅ | ✅ |
-| `perm_role` / `perm_user` | RBAC roles and users | ✅ | ✅ |
+| Table | Description |
+|-------|-------------|
+| `host_host` | Registered remote hosts |
+| `host_session` | Command execution sessions |
+| `host_program` | Installed programs on hosts |
+| `host_log` | Centralized host logs |
+| `script_scripttask` | Scheduled scripts |
+| `script_script` | Saved script content |
+| `perm_role` / `perm_user` | RBAC roles and users |
 
-EE-only tables (created when `taurus_ee` is installed):
+Workflow / approval tables:
 
 | Table | Description |
 |-------|-------------|

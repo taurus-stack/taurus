@@ -15,8 +15,7 @@ taurus-stack/                      ← 根仓库（submodule 聚合）
 ├── taurus-executor/    [submodule]    Python + gRPC
 ├── taurus-supervisor/  [submodule]    Python + asyncio
 ├── taurus-auth/        [submodule]    Django 票据服务
-├── taurus-scheduler/   [submodule]    APScheduler
-└── taurus_ee/          [私有]         企业版（不公开）
+└── taurus-scheduler/   [submodule]    APScheduler
 ```
 
 ## 开发环境搭建
@@ -31,7 +30,7 @@ cd taurus-backend && poetry install && cd ..
 cd taurus-web && pnpm install && cd ..
 ```
 
-各服务专属搭建指南见对应子仓库 `README.md`。
+各服务专属搭建指南见对应子仓库 `README.md`（英文）或 `README.zh-CN.md`（中文）。
 
 ## 分支策略
 
@@ -61,7 +60,6 @@ main (主干，始终可部署)
 | 主机守护、心跳、程序生命周期 | `taurus-supervisor` |
 | 票据鉴权、JWT | `taurus-auth` |
 | 定时任务派发、HA 选举 | `taurus-scheduler` |
-| **企业版专属** | `taurus_ee`（私有仓库） |
 
 ### 2. 创建分支开发
 
@@ -220,28 +218,14 @@ git diff --cached | grep -i 'password\|secret\|key\|token'
 - CA 证书 `ca.crt` — 可提交（公开证书）
 - Client 证书 — 每次部署生成，永不提交
 
-### License 系统
-
-如果修改 `taurus/editions/` 或 `taurus_ee/`：
-
-1. **禁止** 在 CE 可达路径中添加签发代码
-2. **禁止** 提交私钥
-3. **必须** 验证双条件 Gate 正常：
-   ```bash
-   TAURUS_DEV_BYPASS_LICENSE=1 python manage.py license_status --json
-   ```
-
 ### 安全漏洞报告
 
-请**不要**在公开 Issue 中报告安全问题。联系 [security@taurus-ops.local]。
+请**不要**在公开 Issue 中报告安全问题。联系 [taurus-stack@outlook.com](mailto:taurus-stack@outlook.com)。
 
 ## FAQ
 
 **Q: 需要所有 submodule 才能运行吗？**
-A: 不用。最小集：`taurus-backend` + `taurus-web` + `taurus-auth`。
-
-**Q: 没有私有仓库能开发 EE 功能吗？**
-A: 可以。在 `taurus/ee_fallback.py` 写 stub，在 `views.py`/`serializers.py` 写薄封装。Gate 后面的 EE 实现在私有仓库——CE 测试验证 Gate 工作正常。
+A: 不用。最小集：`taurus-backend` + `taurus-web` + `taurus-executor`。
 
 **Q: 为什么两个 Django 服务（backend, auth）？**
 A: Auth 独立出来是安全设计。Executor 直接通过 HTTP 验证 Auth 的执行票据——不共享数据库，Executor 和 Backend 之间无信任边界。
@@ -253,4 +237,4 @@ A: 可以。开发时设 `TAURUS_DEV_BYPASS_EXECUTOR=1` 或用 mock executor cli
 
 ## License
 
-贡献代码意味着同意你的贡献按照项目的 GNU AGPLv3（社区版）或专有商业 License（企业版）授权，取决于你贡献的仓库。
+贡献代码意味着同意你的贡献按照项目的 GNU AGPLv3 授权。

@@ -15,8 +15,7 @@ taurus-stack/                      ← Root (this repo, submodule aggregate)
 ├── taurus-executor/    [submodule]    Python + gRPC
 ├── taurus-supervisor/  [submodule]    Python + asyncio
 ├── taurus-auth/        [submodule]    Django ticket service
-├── taurus-scheduler/   [submodule]    APScheduler
-└── taurus_ee/          [private]      Enterprise Edition (not public)
+└── taurus-scheduler/   [submodule]    APScheduler
 ```
 
 ## Development Environment Setup
@@ -31,7 +30,7 @@ cd taurus-backend && poetry install && cd ..
 cd taurus-web && pnpm install && cd ..
 ```
 
-See each submodule's `README.md` for service-specific setup instructions.
+See each submodule's `README.md` (English) or `README.zh-CN.md` (Chinese) for service-specific setup instructions.
 
 ## Branch Strategy
 
@@ -61,7 +60,6 @@ main (trunk, always deployable)
 | Host daemon, heartbeat, program lifecycle | `taurus-supervisor` |
 | Ticket authentication, JWT | `taurus-auth` |
 | Scheduled task dispatch, HA election | `taurus-scheduler` |
-| **Enterprise-only features** | `taurus_ee` (private repo) |
 
 ### 2. Create a feature branch
 
@@ -222,28 +220,14 @@ git diff --cached | grep -i 'password\|secret\|key\|token'
 - CA certificate `ca.crt` — safe to commit (public)
 - Client certificates — generated per deployment, never committed
 
-### License system
-
-If you touch `taurus/editions/` or `taurus_ee/`:
-
-1. **Never** add signing code to CE-reachable paths
-2. **Never** commit private keys
-3. **Always** verify the dual-condition gate works:
-   ```bash
-   TAURUS_DEV_BYPASS_LICENSE=1 python manage.py license_status --json
-   ```
-
 ### Reporting security issues
 
-Please **do not open public issues** for security vulnerabilities. Contact us at [security@taurus-ops.local].
+Please **do not open public issues** for security vulnerabilities. Contact us at [taurus-stack@outlook.com](mailto:taurus-stack@outlook.com).
 
 ## FAQ
 
 **Q: Do I need all submodules to run?**
-A: No. Minimum working set: `taurus-backend` + `taurus-web` + `taurus-auth`.
-
-**Q: Can I work on EE features without the private repo?**
-A: Yes. Write stubs in `taurus/ee_fallback.py` and thin wrappers in `views.py`/`serializers.py`. The EE implementation lives behind the gate — CE tests verify the gate works, EE tests live in the private repo.
+A: No. Minimum working set: `taurus-backend` + `taurus-web` + `taurus-executor`.
 
 **Q: Why are there two Django apps (taurus-backend, taurus-auth)?**
 A: Auth is isolated for security. Executor verifies execution tickets directly with Auth via HTTP — no shared database, no trust boundary between executor and backend.
@@ -255,4 +239,4 @@ A: `TAURUS_DEV_BYPASS_EXECUTOR=1` (for development only) or use a mock executor 
 
 ## License
 
-By contributing, you agree that your contributions will be licensed under the project's GNU AGPLv3 (Community) or proprietary commercial license (Enterprise), depending on which repository you contribute to.
+By contributing, you agree that your contributions will be licensed under the project's GNU AGPLv3.
