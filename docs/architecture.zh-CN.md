@@ -31,15 +31,9 @@
 │   │                   Taurus Backend (Django 4.2)              │          │
 │   │                                                             │          │
 │   │  ┌──────────────┐  ┌──────────────┐  ┌──────────────────┐ │          │
-│   │  │ Edition Gate │  │  工作流引擎   │  │  调度处理器       │ │          │
-│   │  │ (社区版       │  │              │  │                  │ │          │
-│   │  │  vs 企业版)   │  │              │  │                  │ │          │
-│   │  └──────┬───────┘  └──────┬───────┘  └────────┬─────────┘ │          │
-│   │         │                  │                  │            │          │
-│   │  ┌──────▼──────────────────▼──────────────────▼─────────┐  │          │
-│   │  │              taurus_ee（企业版专属）                   │  │          │
-│   │  │  • 审批引擎  • 通知  • HA 调度  • 策略引擎  • DAG   │  │          │
-│   │  └──────────────────────────────────────────────────────┘  │          │
+│   │  │  工作流引擎   │  │  调度处理器   │  │  审批/程序管理   │ │          │
+│   │  │              │  │              │  │                  │ │          │
+│   │  └──────────────┘  └──────────────┘  └──────────────────┘ │          │
 │   │                                                             │          │
 │   │  ┌──────────────────────────────────────────────────────┐  │          │
 │   │  │        MySQL/MariaDB 8.0+                            │  │          │
@@ -156,11 +150,10 @@ Web: POST /api/taurus/session/  (HTTP + JWT)
     │
     ▼
 Backend: SessionViewSet.create()
-    │  1. 检查 has_feature("COMMAND_SINGLE")
-    │  2. 检查主机在线
-    │  3. 生成 execution ticket (通过 taurus-auth)
-    │  4. 创建 Session 记录 (status=RUNNING)
-    │  5. gRPC 调用 Executor
+    │  1. 检查主机在线
+    │  2. 生成 execution ticket (通过 taurus-auth)
+    │  3. 创建 Session 记录 (status=RUNNING)
+    │  4. gRPC 调用 Executor
     │
     ▼
 Executor: CommandService.Run()
@@ -179,8 +172,7 @@ Web: Terminal 组件渲染输出
 
 | 层 | 类 | 位置 |
 |---|---|---|
-| API | `SessionViewSet` | `taurus/views.py` (薄封装 → `taurus_ee/`) |
-| Gate | `ee_service_or_403` | `taurus/ee_fallback.py` (CE stub) / `taurus_ee/utils/gate.py` (EE) |
+| API | `SessionViewSet` | `taurus/views.py` |
 | gRPC | `GrpcExecutorClient` | `taurus/utils/grpc_client.py` |
 | Ticket | `auth_jwt.issue_ticket` | `taurus/utils/auth_jwt.py` |
 | Model | `Host`, `Session` | `taurus/models.py` |
@@ -204,7 +196,7 @@ Scheduler (Leader, APScheduler)
         └─ POST /api/taurus/script_task/<id>/execute/ → Backend 直接执行
 ```
 
-### HA Scheduler（企业版）
+### HA Scheduler
 
 ```
 Node A (Leader)          Redis                    Node B (Follower)
@@ -234,10 +226,9 @@ Web: 拖拽设计 Workflow DAG
     │  • 连线: 串行 / 并行
     │
     ▼
-Backend: WorkflowEngine (taurus_ee/services/workflow_approval_engine.py)
+Backend: WorkflowEngine
     │  1. 验证 DAG（循环、不可达节点）
-    │  2. 检查 has_feature("WORKFLOW_EXECUTION")
-    │  3. 保存 WorkflowDefinition（JSON）
+    │  2. 保存 WorkflowDefinition（JSON）
     │
     ▼
 Web: 运行 Workflow
@@ -273,20 +264,12 @@ WorkflowExecutionRecord（持久化每个节点结果）
   └── Backend ↔ Supervisor: HMAC-SHA256 (per-host secret)
   └── Backend ↔ Auth: 预共享 service secret
 
-第 3 层: License Gate（企业版）
-  └── RSA-PSS-SHA256 签名 License 文件
-  └── 双条件: edition == "enterprise" AND license.valid == True
-  └── 可选机器指纹绑定
-  └── 规范化 JSON 防篡改
-
-第 4 层: 授权
+第 3 层: 授权
   └── RBAC 角色 + 自定义 permission codes
-  └── 脚本审批工作流（企业版）
   └── IP 白名单
 
-第 5 层: 审计
+第 4 层: 审计
   └── 全操作日志（命令输出、session、审批决策）
-  └── 日志转发外部 SIEM（企业版）
 ```
 
 ### 证书生命周期
@@ -314,19 +297,19 @@ WorkflowExecutionRecord（持久化每个节点结果）
 
 ## 数据库 Schema（高层）
 
-CE 和 EE 共享的核心表：
+核心表：
 
-| 表 | 说明 | CE? | EE? |
-|---|---|---|---|
-| `host_host` | 注册的远程主机 | ✅ | ✅ |
-| `host_session` | 命令执行 session | ✅ | ✅ |
-| `host_program` | 主机上安装的程序 | ✅ | ✅ |
-| `host_log` | 主机日志集中存储 | ✅ | ✅ |
-| `script_scripttask` | 定时脚本 | ✅ | ✅ |
-| `script_script` | 脚本内容 | ✅ | ✅ |
-| `perm_role` / `perm_user` | RBAC 角色和用户 | ✅ | ✅ |
+| 表 | 说明 |
+|---|---|
+| `host_host` | 注册的远程主机 |
+| `host_session` | 命令执行 session |
+| `host_program` | 主机上安装的程序 |
+| `host_log` | 主机日志集中存储 |
+| `script_scripttask` | 定时脚本 |
+| `script_script` | 脚本内容 |
+| `perm_role` / `perm_user` | RBAC 角色和用户 |
 
-EE 专属表（安装 `taurus_ee` 时创建）：
+工作流 / 审批表：
 
 | 表 | 说明 |
 |---|---|
