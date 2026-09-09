@@ -150,6 +150,39 @@ git submodule update --remote --recursive
 - Poetry (Python dependency management)
 - pnpm (Frontend dependency management)
 
+### One-click startup (recommended)
+
+```bash
+# 0. Clone with submodules
+git clone --recurse-submodules https://github.com/taurus-ops/taurus-stack.git
+cd taurus-stack
+
+# 1. Init (install + migrate + init; run on first setup or after a clean)
+./scripts/dev.sh --init
+
+# 2. Start the minimal chain (backend + WS + auth + web; three background processes)
+./scripts/dev.sh
+
+# Or the full chain (adds scheduler + scheduler-worker)
+./scripts/dev.sh --all
+```
+
+Once up, open `http://localhost:3000` — default account **superadmin / admin123456**.
+
+> Other `dev.sh` flags: `--backend`, `--auth`, `--web`, `--scheduler`, `-h` for help.
+
+### VS Code one-click debugging (launch.json)
+
+The root `.vscode/launch.json` ships pre-configured launch combinations — just press F5:
+
+| Configuration                  | Includes                                        |
+| ------------------------------ | ----------------------------------------------- |
+| 🚀 完整开发环境                  | backend + WebSocket                             |
+| 🚀 完整开发环境 + 定时任务        | backend + WS + scheduler + scheduler-worker     |
+| 🌐 全栈开发                    | backend + WS + web                              |
+| 🌐 全栈开发 + 定时任务            | backend + WS + web + scheduler + worker         |
+| 🔐 票据鉴权开发                  | backend + auth + executor                       |
+
 ### Development Setup (Community Edition)
 
 ```bash
