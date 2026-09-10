@@ -129,6 +129,8 @@ services:
       TZ: Asia/Shanghai
     volumes:
       - ./taurus-backend/certs:/app/certs:ro
+    healthcheck:
+      disable: true
     depends_on:
       taurus-backend:
         condition: service_healthy
@@ -155,6 +157,8 @@ services:
       TZ: Asia/Shanghai
     volumes:
       - ./taurus-backend/certs:/app/certs:ro
+    healthcheck:
+      disable: true
     depends_on:
       taurus-backend:
         condition: service_healthy
