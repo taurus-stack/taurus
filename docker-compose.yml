@@ -88,7 +88,7 @@ services:
       GUNICORN_TIMEOUT: ${GUNICORN_TIMEOUT:-120}
       TZ: Asia/Shanghai
     volumes:
-      - ./taurus-backend/certs:/app/certs:ro
+      - ./taurus-backend/certs:/app/certs
       - backend-media:/app/media
       - backend-logs:/app/logs
     depends_on:
@@ -174,6 +174,7 @@ services:
     restart: unless-stopped
     ports:
       - "50051:50051"
+      - "9090:9090"
     environment:
       GRPC_HOST: ${GRPC_HOST:-0.0.0.0}
       GRPC_PORT: ${GRPC_PORT:-50051}
@@ -182,9 +183,12 @@ services:
       TAURUS_SERVER_URL: http://taurus-backend:8000
       TAURUS_AUTH_URL: http://taurus-auth:8001
       TAURUS_HOST_UUID: ${EXECUTOR_HOST_UUID:-docker-host-001}
+      METRICS_ENABLED: "true"
+      METRICS_PORT: 9090
     volumes:
-      - ./taurus-executor/tls:/opt/taurus-executor/tls:ro
+      - ./taurus-executor/tls:/opt/taurus-executor/tls
       - executor-data:/opt/taurus-executor/data
+      - supervisor-data:/opt/taurus:ro
       - executor-versions:/opt/taurus/versions
     depends_on:
       taurus-backend:
@@ -192,11 +196,11 @@ services:
       taurus-auth:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:50051/"]
+      test: ["CMD", "curl", "-f", "http://localhost:9090/"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 5s
+      start_period: 10s
     networks:
       - taurus-net
 
@@ -258,8 +262,11 @@ services:
     network_mode: "service:taurus-executor"
     environment:
       SERVER_URL: http://taurus-backend:8000
-      HOST_ID: ${SUPERVISOR_HOST_ID:-supervisor-001}
+      BASE_DIR: /opt/taurus
+      HOST_ID: ${SUPERVISOR_HOST_ID:-}
+      REGISTER_TOKEN: ${SUPERVISOR_REGISTER_TOKEN:-}
       REQUEST_SIGNING_SECRET: ${SUPERVISOR_SIGNING_SECRET:-}
+      TAURUS_HOST_IP: taurus-executor
       SUPERVISOR_HEARTBEAT_INTERVAL: ${SUPERVISOR_HEARTBEAT_INTERVAL:-10}
       HEALTH_CHECK_INTERVAL: ${HEALTH_CHECK_INTERVAL:-10}
       SUPERVISOR_SSL_VERIFY: "false"
