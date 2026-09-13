@@ -1,2 +1,0 @@
-unhealthy
-HEALTH_OK

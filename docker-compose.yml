@@ -81,7 +81,6 @@ services:
       REQUEST_SIGNING_ENABLED: "True"
       SIGNING_MASTER_KEY: ${SIGNING_MASTER_KEY:-change-me-to-a-secure-master-key}
       SUPERVISOR_SSL_VERIFY: "False"
-      TAURUS_EDITION: ${TAURUS_EDITION:-community}
       TAURUS_AUTH_URL: ${TAURUS_AUTH_URL:-http://taurus-auth:8001}
       GUNICORN_WORKERS: ${GUNICORN_WORKERS:-4}
       GUNICORN_THREADS: ${GUNICORN_THREADS:-2}

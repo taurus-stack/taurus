@@ -22,6 +22,21 @@ Taurus Stack is a comprehensive distributed operations management system (堡垒
 
 ---
 
+## License & Service Tiers
+
+Taurus Stack ships as a **single, fully-featured edition** under AGPLv3: every functional module — the workflow engine, approval flows, security scanning, program management, extension center, and more — is enabled by default, with no community/enterprise feature split. Editions differ only in the **host quota** and the **License service tier**:
+
+| Mode | Managed hosts | Users / tasks / workflows / script versions / concurrency | White-label | Support |
+| --- | --- | --- | --- | --- |
+| Free (no License) | Up to 50 hosts | Unlimited | Not available | Community support, no commercial SLA |
+| Commercial License (starter / professional / enterprise / ultimate) | Raised by tier | Unlimited | Professional tier and above | Tiered commercial support (ticket / dedicated channels / SLA) |
+
+- Once the free tier reaches the 50-host limit, only new host registration is blocked; existing hosts and every other feature keep working;
+- Commercial Licenses additionally include a **30-day grace period** after expiry and tiered update channels (stable / lts / hotfix / preview);
+- Licenses are imported via the CLI only: `python manage.py license_import <license-file>`. Once imported, the status, quota usage, and service tier are visible under **General Config → License & Service** in the web console.
+
+---
+
 ## Screenshots
 
 ### Dashboard & Host Management
@@ -183,7 +198,7 @@ The root `.vscode/launch.json` ships pre-configured launch combinations — just
 | 🌐 全栈开发 + 定时任务            | backend + WS + web + scheduler + worker         |
 | 🔐 票据鉴权开发                  | backend + auth + executor                       |
 
-### Development Setup (Community Edition)
+### Development Setup
 
 ```bash
 # 0. Clone with submodules

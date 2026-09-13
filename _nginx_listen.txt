@@ -1,3 +1,0 @@
-2:    listen 80;
-3:    listen [::]:80;
-healthy
