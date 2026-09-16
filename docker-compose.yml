@@ -77,8 +77,16 @@ services:
       CELERY_BROKER_URL: redis://${REDIS_HOST:-redis}:${REDIS_PORT:-6379}/3
       DEBUG: "False"
       ALLOWED_HOSTS: "*"
+      LOGIN_NO_CAPTCHA_AUTH: "False"
+      ENABLE_LOGIN_ANALYSIS_LOG: "False"
+      REQUEST_SIGNING_ENABLED: "True"
+      SIGNING_MASTER_KEY: ${SIGNING_MASTER_KEY:-change-me-to-a-secure-master-key}
+      SUPERVISOR_SSL_VERIFY: "False"
       TAURUS_EDITION: ${TAURUS_EDITION:-community}
       TAURUS_AUTH_URL: ${TAURUS_AUTH_URL:-http://taurus-auth:8001}
+      GUNICORN_WORKERS: ${GUNICORN_WORKERS:-4}
+      GUNICORN_THREADS: ${GUNICORN_THREADS:-2}
+      GUNICORN_TIMEOUT: ${GUNICORN_TIMEOUT:-120}
       TZ: Asia/Shanghai
     volumes:
       - ./taurus-backend/certs:/app/certs:ro
@@ -90,7 +98,7 @@ services:
       redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health/')"]
+      test: ["CMD", "curl", "-fsS", "http://localhost:8000/api/health/"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -116,11 +124,14 @@ services:
       DATABASE_PASSWORD: ${DB_PASSWORD:-taurus}
       DATABASE_NAME: ${DB_NAME_BACKEND:-taurus_backend}
       REDIS_URL: redis://${REDIS_HOST:-redis}:${REDIS_PORT:-6379}/1
+      DEBUG: "False"
       WEBSOCKET_HOST: ${WEBSOCKET_HOST:-0.0.0.0}
       WEBSOCKET_PORT: ${WEBSOCKET_PORT:-8765}
       TZ: Asia/Shanghai
     volumes:
       - ./taurus-backend/certs:/app/certs:ro
+    healthcheck:
+      disable: true
     depends_on:
       taurus-backend:
         condition: service_healthy
@@ -143,9 +154,12 @@ services:
       DATABASE_PASSWORD: ${DB_PASSWORD:-taurus}
       DATABASE_NAME: ${DB_NAME_BACKEND:-taurus_backend}
       REDIS_URL: redis://${REDIS_HOST:-redis}:${REDIS_PORT:-6379}/1
+      DEBUG: "False"
       TZ: Asia/Shanghai
     volumes:
       - ./taurus-backend/certs:/app/certs:ro
+    healthcheck:
+      disable: true
     depends_on:
       taurus-backend:
         condition: service_healthy
@@ -161,6 +175,7 @@ services:
     restart: unless-stopped
     ports:
       - "50051:50051"
+      - "9090:9090"
     environment:
       GRPC_HOST: ${GRPC_HOST:-0.0.0.0}
       GRPC_PORT: ${GRPC_PORT:-50051}
@@ -169,9 +184,12 @@ services:
       TAURUS_SERVER_URL: http://taurus-backend:8000
       TAURUS_AUTH_URL: http://taurus-auth:8001
       TAURUS_HOST_UUID: ${EXECUTOR_HOST_UUID:-docker-host-001}
+      METRICS_ENABLED: "true"
+      METRICS_PORT: 9090
     volumes:
       - ./taurus-executor/tls:/opt/taurus-executor/tls:ro
       - executor-data:/opt/taurus-executor/data
+      - supervisor-data:/opt/taurus:ro
       - executor-versions:/opt/taurus/versions
     depends_on:
       taurus-backend:
@@ -179,11 +197,11 @@ services:
       taurus-auth:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:50051/"]
+      test: ["CMD", "curl", "-f", "http://localhost:9090/"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 5s
+      start_period: 10s
     networks:
       - taurus-net
 
@@ -245,8 +263,11 @@ services:
     network_mode: "service:taurus-executor"
     environment:
       SERVER_URL: http://taurus-backend:8000
+      BASE_DIR: /opt/taurus
       HOST_ID: ${SUPERVISOR_HOST_ID:-supervisor-001}
+      REGISTER_TOKEN: ${SUPERVISOR_REGISTER_TOKEN:-}
       REQUEST_SIGNING_SECRET: ${SUPERVISOR_SIGNING_SECRET:-}
+      TAURUS_HOST_IP: taurus-executor
       SUPERVISOR_HEARTBEAT_INTERVAL: ${SUPERVISOR_HEARTBEAT_INTERVAL:-10}
       HEALTH_CHECK_INTERVAL: ${HEALTH_CHECK_INTERVAL:-10}
       SUPERVISOR_SSL_VERIFY: "false"
@@ -318,6 +339,7 @@ services:
       DATABASE_PASSWORD: ${DB_PASSWORD:-taurus}
       DATABASE_NAME: ${DB_NAME_BACKEND:-taurus_backend}
       REDIS_URL_SCHEDULER: redis://${REDIS_HOST:-redis}:${REDIS_PORT:-6379}/2
+      DEBUG: "False"
       WORKER_CONCURRENCY: ${WORKER_CONCURRENCY:-4}
       TAURUS_SCHEDULER_QUEUE: ${TAURUS_SCHEDULER_QUEUE:-taurus:scheduler:queue:script_task}
       TZ: Asia/Shanghai

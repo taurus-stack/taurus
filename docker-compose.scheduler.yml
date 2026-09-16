@@ -85,6 +85,8 @@ services:
       - ./taurus-backend/certs:/app/certs:ro
     networks:
       - taurus-net
+    healthcheck:
+      disable: true
     depends_on:
       - mysql
       - redis

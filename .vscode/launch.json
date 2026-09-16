@@ -9,7 +9,6 @@
       "cwd": "${workspaceFolder}/taurus-backend",
       "env": {
         "DJANGO_SETTINGS_MODULE": "application.settings",
-        "TAURUS_EDITION": "enterprise",
         "TAURUS_DEV_BYPASS_LICENSE": "1"
       },
       "args": [
@@ -28,7 +27,6 @@
       "env": {
         "PYTHONPATH": "${workspaceFolder}/taurus-backend",
         "DJANGO_SETTINGS_MODULE": "application.settings",
-        "TAURUS_EDITION": "enterprise",
         "TAURUS_DEV_BYPASS_LICENSE": "1",
         "WEBSOCKET_HOST": "0.0.0.0",
         "WEBSOCKET_PORT": "8765"
@@ -149,7 +147,6 @@
       "env": {
         "PYTHONPATH": "${workspaceFolder}/taurus-backend",
         "DJANGO_SETTINGS_MODULE": "application.settings",
-        "TAURUS_EDITION": "enterprise",
         "TAURUS_DEV_BYPASS_LICENSE": "1",
         "TAURUS_SCHEDULER_QUEUE": "taurus:scheduler:queue:script_task",
         "TAURUS_SCHEDULER_DEDUP_PREFIX": "taurus:scheduler:dedup",
@@ -178,7 +175,6 @@
       "env": {
         "PYTHONPATH": "${workspaceFolder}/taurus-backend",
         "DJANGO_SETTINGS_MODULE": "application.settings",
-        "TAURUS_EDITION": "enterprise",
         "TAURUS_DEV_BYPASS_LICENSE": "1",
         "TAURUS_SCHEDULER_QUEUE": "taurus:scheduler:queue:script_task",
         "REDIS_URL_SCHEDULER": "redis://:123456@127.0.0.1:6379/2"
