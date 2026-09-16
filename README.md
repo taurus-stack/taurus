@@ -34,7 +34,6 @@ Taurus Stack ships as a **single, fully-featured edition** under AGPLv3: every f
 - Once the free tier reaches the 50-host limit, only new host registration is blocked; existing hosts and every other feature keep working;
 - Commercial Licenses additionally include a **30-day grace period** after expiry and tiered update channels (stable / lts / hotfix / preview);
 - Licenses are imported via the CLI only: `python manage.py license_import <license-file>`. Once imported, the status, quota usage, and service tier are visible under **General Config → License & Service** in the web console.
-
 ---
 
 ## Screenshots

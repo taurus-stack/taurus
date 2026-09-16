@@ -34,7 +34,6 @@ Taurus Stack 只有**一个全功能版本**，以 AGPLv3 开源：工作流引�
 - 免费版主机达到 50 台上限后，仅阻止注册新主机，不影响已有主机与其他任何功能；
 - 商业 License 另提供 **30 天到期宽限期**与按等级开放的升级通道（stable / lts / hotfix / preview）；
 - License 仅支持命令行导入：`python manage.py license_import <license-file>`，导入后可在 Web 端「常规配置 → License & Service」查看授权状态、配额用量与服务等级。
-
 ---
 
 ## 功能截图
